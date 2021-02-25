@@ -5,13 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
- public class ClientHandler {
+public class ClientHandler {
     private MyServer myServer;
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
     private boolean authenticated;
-    private boolean sendingTimeout;
+    private boolean sendingTimeout = true;
     private String name;
 
     public String getName() {
@@ -34,9 +34,10 @@ import java.net.Socket;
                                 try {
 
                                     Thread.sleep(120000);
-                                    if (authenticated == false)
-                                    {   sendMsg("Клиент отключен от сервера по таймауту ");
-                                    closeConnection();}
+                                    if (authenticated == false) {
+                                        sendMsg("Клиент отключен от сервера по таймауту ");
+                                        closeConnection();
+                                    }
                                     ;
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -48,25 +49,27 @@ import java.net.Socket;
 
                     authentication();
 
-                             new Thread(new Runnable() {
+
+                    new Thread(new Runnable() {
                         public void run() {
                             while(true){
-                                try {
+                            try {
 
-                                    Thread.sleep(10000);
+                                Thread.sleep(180000);
 
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            if(sendingTimeout==true)
-                            {
-                                sendMsg("пользователь отключен за бездействие");
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            if (sendingTimeout == true) {
+                                sendMsg("пользователь отключен за бездействие ");
                                 closeConnection();
 
                             }
-                                sendingTimeout=true;
-                        }
-                        }
+                                sendingTimeout = true;
+
+
+                        }}
+
                     }).start();
 
                     readMessages();
@@ -108,11 +111,12 @@ import java.net.Socket;
         }
     }
 
-   synchronized public void readMessages() throws IOException {
+    synchronized public void readMessages() throws IOException {
 
         while (true) {
             String str = in.readUTF();
-            sendingTimeout=false;
+            sendingTimeout = false;
+
             System.out.println(sendingTimeout);
             if (str.startsWith("/")) {
                 if (str.equals("/end")) {
@@ -132,7 +136,7 @@ import java.net.Socket;
 
     }
 
-     public void  sendMsg(String msg) {
+    public void sendMsg(String msg) {
         try {
             out.writeUTF(msg);
 
